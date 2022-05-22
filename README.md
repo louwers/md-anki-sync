@@ -10,18 +10,9 @@ For example the following Markdown file:
 ````md
 # Node.js Deck
 
-## What events to all  implementations emit? How can you listen for events on implementations of `EventEmitter`?
+## What is the capital of France?
 
-- `'newListener'`
-- `'removeListener'`
-
-You can listen to an event using the `on` method as follows.
-
-```js
-myEmitter.on('event', () => {
-  console.log('an event occurred!');
-});
-```
+Paris
 ````
 
 Will create a deck titled 'Node.js deck' with one card that contains the second heading as question and the body of the heading as answer.
@@ -29,7 +20,7 @@ Will create a deck titled 'Node.js deck' with one card that contains the second 
 The 'killer feature' of this script compared to the other scripts that I came across, is that an identifier will get added to every question:
 
 ```md
-## What events to all  implementations emit? How can you listen for events on implementations of `EventEmitter`? <!-- id:67da3a0fe59f3b71b5a4f78d51cc67b1 -->
+## What is the capital of France? <!-- id:67da3a0fe59f3b71b5a4f78d51cc67b1 -->
 ```
 
 This allows the script to update any existing questions.
@@ -40,6 +31,11 @@ You can run it as follows.
 ```sh
 $ npm run md-anki-sync -- filename.md
 ```
+
+## Features
+
+- Syncs Markdown files to Anki.
+- Syntax highlighting for code snippets.
 
 ## Links
 

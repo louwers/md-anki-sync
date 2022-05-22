@@ -8,14 +8,14 @@ This script allows you to sync Markdown files to Anki.
 For example the following Markdown file:
 
 ````md
-# Node.js Deck
+# My Deck
 
 ## What is the capital of France?
 
 Paris
 ````
 
-Will create a deck titled 'Node.js deck' with one card that contains the second heading as question and the body of the heading as answer.
+Will create a deck titled 'My Deck' with one card that contains the second heading as question and the body of the heading as answer.
 
 The 'killer feature' of this script compared to the other scripts that I came across, is that an identifier will get added to every question:
 

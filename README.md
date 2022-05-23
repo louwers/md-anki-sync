@@ -1,19 +1,19 @@
 # Markdown ➡️ Anki Sync
 
 > **Warning**
-> This should be considered a quickly-hacked together 'proof of concept'. Not really ready to be used yet. 
+> This should be considered a quickly-hacked together 'proof of concept'. Not really ready to be used yet.
 
 This script allows you to sync Markdown files to Anki.
 
 For example the following Markdown file:
 
-````md
+```md
 # My Deck
 
 ## What is the capital of France?
 
 Paris
-````
+```
 
 Will create a deck titled 'My Deck' with one card that contains the second heading as question and the body of the heading as answer.
 
@@ -26,7 +26,6 @@ The 'killer feature' of this script compared to the other scripts that I came ac
 This allows the script to update any existing questions.
 
 You can run it as follows.
-
 
 ```sh
 $ npm run md-anki-sync -- filename.md

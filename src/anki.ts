@@ -1,19 +1,21 @@
-import fetch from 'node-fetch';
+import fetch from "node-fetch";
 
 async function getResult(body: any) {
-  const res: any = await (await fetch("http://localhost:8765", {
-    method: 'post',
-    headers: {
-      'Content-Type': 'application/json'
-    },
-    body: JSON.stringify({
-      ...body,
-      version: 6,
+  const res: any = await (
+    await fetch("http://localhost:8765", {
+      method: "post",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        ...body,
+        version: 6,
+      }),
     })
-  })).json();
+  ).json();
 
   if (res.error) {
-    console.log(JSON.stringify(body, null, 2))
+    console.log(JSON.stringify(body, null, 2));
     throw new Error(`Operation '${body.action}' failed: ${res.error}`);
   }
 
@@ -22,7 +24,7 @@ async function getResult(body: any) {
 
 export async function getDeckNames(): Promise<string[]> {
   const res = await getResult({
-    action: 'deckNames'
+    action: "deckNames",
   });
 
   return res;
@@ -32,8 +34,8 @@ export async function getModelFieldNames(modelName: string) {
   const res = await getResult({
     action: "modelFieldNames",
     params: {
-      modelName: modelName
-    }
+      modelName: modelName,
+    },
   });
   return res;
 }
@@ -45,19 +47,21 @@ export async function createModel(modelName: string) {
       modelName,
       inOrderFields: ["Front", "Back", "Id"],
       isCloze: false,
-      cardTemplates: [{
-        Front: "{{Front}}",
-        Back: "{{Front}}<hr>{{Back}}"
-      }]
-    }
-  })
+      cardTemplates: [
+        {
+          Front: "{{Front}}",
+          Back: "{{Front}}<hr>{{Back}}",
+        },
+      ],
+    },
+  });
   return res;
 }
 
 export async function modelNames(): Promise<string[]> {
   const res = await getResult({
-    action: "modelNames"
-  })
+    action: "modelNames",
+  });
   return res;
 }
 
@@ -67,9 +71,9 @@ export async function updateModelStyling(modelName: string, css: string) {
     params: {
       model: {
         name: modelName,
-        css
-      }
-    }
+        css,
+      },
+    },
   });
   return res;
 }
@@ -78,13 +82,16 @@ export async function createDeck(deckName: string) {
   const res = await getResult({
     action: "createDeck",
     params: {
-      deck: deckName
-    }
+      deck: deckName,
+    },
   });
   return res;
 }
 
-export async function addNote(deckName: string, {front, back, id}: {front: string, back: string, id: string}) {
+export async function addNote(
+  deckName: string,
+  { front, back, id }: { front: string; back: string; id: string }
+) {
   const res = await getResult({
     action: "addNote",
     params: {
@@ -94,11 +101,11 @@ export async function addNote(deckName: string, {front, back, id}: {front: strin
         fields: {
           Front: front,
           Back: back,
-          Id: id
-        }
-      }
-    }
-  })
+          Id: id,
+        },
+      },
+    },
+  });
   return res;
 }
 
@@ -106,13 +113,16 @@ export async function findNotes(id: string): Promise<number[]> {
   const res = await getResult({
     action: "findNotes",
     params: {
-      query: `"id:${id}"`
-    }
+      query: `"id:${id}"`,
+    },
   });
   return res;
 }
 
-export async function updateNoteFields(id: number, {front, back}: {front: string, back: string}) {
+export async function updateNoteFields(
+  id: number,
+  { front, back }: { front: string; back: string }
+) {
   const res = await getResult({
     action: "updateNoteFields",
     params: {
@@ -120,10 +130,10 @@ export async function updateNoteFields(id: number, {front, back}: {front: string
         id,
         fields: {
           Front: front,
-          Back: back
-        }
-      }
-    }
+          Back: back,
+        },
+      },
+    },
   });
   return res;
 }
@@ -132,8 +142,8 @@ export async function notesInfo(noteId: number): Promise<any[]> {
   const res = await getResult({
     action: "notesInfo",
     params: {
-      notes: [noteId]
-    }
+      notes: [noteId],
+    },
   });
   return res;
 }

@@ -98,6 +98,10 @@ function questionHasContext(
 
 type Context = Parameters<typeof processMarkdown>[0];
 
+export function shouldIncludeHeaderInQuestion(headerText: string) {
+  return !headerText.startsWith("Question");
+}
+
 function encounteredQuestion(
   ctx: Context,
   headToken: marked.Token & { type: "heading" },
@@ -129,7 +133,7 @@ function encounteredQuestion(
       id: id,
       questionDepth: headToken.depth,
       gathering,
-      question: [headToken],
+      question: shouldIncludeHeaderInQuestion(headToken.text) ? [headToken] : [],
       answer: [],
     },
   };

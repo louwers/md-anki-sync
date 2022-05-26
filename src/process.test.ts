@@ -1,19 +1,6 @@
 import { test, expect } from "vitest";
-import { getCards, RenderedCard, renderCard, isDeck } from "./process";
+import { getCards, RenderedCard, renderCard, isDeck, shouldIncludeHeaderInQuestion } from "./process";
 import { htmlToText } from "html-to-text";
-
-const md1 = `
-# Deck: My Deck
-
-## First question?
-
-First answer`;
-
-test.skip("md1", () => {
-  expect(() => {
-    getCards(md1);
-  }).toThrowError(/Question .* missing ID./);
-});
 
 const md2 = `
 # Deck: My Deck
@@ -87,6 +74,10 @@ test("isDeck", () => {
   expect(isDeck("Deck: Test")).toBe(true);
 });
 
+test("shouldIncludeHeaderInQuestion", () => {
+  expect(shouldIncludeHeaderInQuestion("Question")).toBe(false);
+})
+
 const md4 = `
 # Deck: Upper Deck
 
@@ -111,5 +102,70 @@ test("md4", () => {
     deck: "Upper Deck::Nested",
   };
 
+  expect(plainCard).toEqual(expectedCard);
+});
+
+
+const md5 = `
+# Deck: My Deck
+
+### Some Question  <!-- id:yyy -->
+
+Some Answer
+
+### Some Other Question  <!-- id:zzz -->
+
+Another answer
+`;
+
+test("Multiple Questions", () => {
+  const cards = getCards(md5);
+  expect(cards).toHaveLength(2);
+
+  const renderedCard0 = renderCard(cards[0]);
+  const plainCard0 = makePlainCard(renderedCard0);
+  const expectedCard0 = {
+    question: "Some Question",
+    answer: "Some Answer",
+    id: "yyy",
+    deck: "My Deck",
+  };
+
+  expect(plainCard0).toEqual(expectedCard0);
+
+  const renderedCard1 = renderCard(cards[1]);
+  const plainCard1 = makePlainCard(renderedCard1);
+  const expectedCard1 = {
+    question: "Some Other Question",
+    answer: "Another answer",
+    id: "zzz",
+    deck: "My Deck",
+  };
+  expect(plainCard1).toEqual(expectedCard1);
+});
+
+const md6 = `
+# Deck: My Deck
+
+## Question  <!-- id:yyy -->
+
+Some Question
+
+### Answer
+
+Some Answer`;
+
+test("Question without heading", () => {
+  const cards = getCards(md6);
+  expect(cards).toHaveLength(1);
+
+  const renderedCard = renderCard(cards[0]);
+  const plainCard = makePlainCard(renderedCard);
+  const expectedCard = {
+    question: "Some Question",
+    answer: "Some Answer",
+    id: "yyy",
+    deck: "My Deck",
+  };
   expect(plainCard).toEqual(expectedCard);
 });

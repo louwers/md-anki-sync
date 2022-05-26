@@ -47,7 +47,7 @@ In this case, the question will go in the 'Geography::Europe' deck.
 
 ### Multi-line Questions
 
-Questions always contain a heading. But they can contain multiple lines. This way you can include images, code snippets, paragraphs of text or even subsections inside your question. When one of the subsequent subsections after your question is exactly the text 'Answer', like below, your question will be interpreted as consisting of multiple lines.
+Questions can contain multiple lines. This way you can include images, code snippets, paragraphs of text or even subsections inside your question. When one of the subsequent subsections after your question is exactly the text 'Answer', like below, your question will be interpreted as consisting of multiple lines.
 
 ```md
 # Deck: Celebrities
@@ -62,6 +62,8 @@ Banksy is a pseudonymous England-based street artist, political activist and fil
 
 Bristol
 ```
+
+When you have a question whose first heading is `Question`, the header is excluded from the question.
 
 ## Installation
 

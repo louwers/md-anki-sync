@@ -3,43 +3,80 @@
 > **Warning**
 > This should be considered a quickly-hacked together 'proof of concept'. Not really ready to be used yet.
 
-This script allows you to sync Markdown files to Anki.
+## Getting Started
 
-For example the following Markdown file:
+Using this script, you can sync Markdown files with Anki.
 
-```md
-# My Deck
-
-## What is the capital of France?
-
-Paris
-```
-
-Will create a deck titled 'My Deck' with one card that contains the second heading as question and the body of the heading as answer.
-
-The 'killer feature' of this script compared to the other scripts that I came across, is that an identifier will get added to every question:
+For example, running the script on the following Markdown file:
 
 ```md
-## What is the capital of France? <!-- id:67da3a0fe59f3b71b5a4f78d51cc67b1 -->
+# Deck: Geography
+
+## What is the capital of Finland?
+
+Helsinki
 ```
 
-This allows the script to update any existing questions.
+Would result in a deck 'My Deck' being created. You will also notice that an identifier will get added to each question:
 
-You can run it as follows.
+```md
+# Deck: Geography
 
-```sh
-$ npm run md-anki-sync -- filename.md
+## What is the capital of Finland?  <!-- id:67da3a0fe59f3b71b5a4f78d51cc67b1 -->
+
+Helsinki
 ```
 
-## Features
+You can update this question later, or delete it, in which case it will also be deleted from the deck. You can even change the deck and the card will be moved there!
 
-- Syncs Markdown files to Anki.
-- Syntax highlighting for code snippets.
+### Subdecks
+
+You can create [subdecks](https://docs.ankiweb.net/deck-options.html#subdecks) by creating subheadings:
+
+```md
+# Deck: Geography
+
+## Deck: Europe
+
+## What is the capital of Finland?
+
+Helsinki
+```
+
+In this case, the question will go in the 'Geography::Europe' deck.
+
+### Multi-line Questions
+
+Questions always contain a heading. But they can contain multiple lines. This way you can include images, code snippets, paragraphs of text or even subsections inside your question. When one of the subsequent subsections after your question is exactly the text 'Answer', like below, your question will be interpreted as consisting of multiple lines.
+
+```md
+# Deck: Celebrities
+
+## Banksy
+
+Banksy is a pseudonymous England-based street artist, political activist and film director whose real name and identity remain unconfirmed and the subject of speculation.
+
+**Which UK city is Banksy from?**
+
+### Answer
+
+Bristol
+```
+
+## Installation
+
+Install [Anki Connect](https://foosoft.net/projects/anki-connect/). Run Anki before starting the script.
+
+Not available on npm yet. Clone this repository. Then:
+
+```
+npm install -g .
+npx md-anki-sync filename.md
+```
 
 ## Links
 
 - Anki Docs: https://docs.ankiweb.net/
-- Anki Connect: https://foosoft.net/projects/anki-connect/
 
 ### Similar tools
 

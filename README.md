@@ -17,7 +17,7 @@ For example, running the script on the following Markdown file:
 Helsinki
 ```
 
-Would result in a deck 'My Deck' being created. You will also notice that an identifier will get added to each question:
+Would result in a deck 'Geography' being created. You will also notice that an identifier will get added to each question:
 
 ```md
 # Deck: Geography

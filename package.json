@@ -4,6 +4,7 @@
   "description": "Sync markdown files to Anki.",
   "main": "index.js",
   "scripts": {
+    "preinstall": "npm run build",
     "build": "tsup src/cli.ts --format cjs,esm --dts",
     "prettify": "prettier --write ."
   },
@@ -26,10 +27,10 @@
   },
   "dependencies": {
     "@autoanki/anki-connect": "^0.0.2",
+    "@louwers/marked": "4.0.17",
     "@types/html-to-text": "^8.1.0",
     "highlight.js": "^11.5.1",
     "markdown-it": "^13.0.1",
-    "marked": "^4.0.16",
     "node-fetch": "^3.2.4",
     "tempy": "^3.0.0"
   }

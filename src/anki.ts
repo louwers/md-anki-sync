@@ -1,149 +1,47 @@
-import fetch from "node-fetch";
+import { RenderedCard } from './process';
 
-async function getResult(body: any) {
-  const res: any = await (
-    await fetch("http://localhost:8765", {
-      method: "post",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        ...body,
-        version: 6,
-      }),
-    })
-  ).json();
+export type AnkiCard = {
+  ankiNoteId: number,
+  ankiCardId: number,
+  id: string,
+  front: string,
+  back: string,
+  deck: string
+}
 
-  if (res.error) {
-    console.log(JSON.stringify(body, null, 2));
-    throw new Error(`Operation '${body.action}' failed: ${res.error}`);
+export interface Anki {
+  getCard(id: string): Promise<AnkiCard | null>
+  addNote(note: Omit<AnkiCard, 'ankiCardId' | 'ankiNoteId'>): Promise<undefined>
+  updateNote(ankiId: number, fields: { front: string, back: string}): Promise<undefined>
+  changeDeck(ankiId: number, deckName: string): Promise<undefined>
+}
+
+async function ensureCard(card: RenderedCard, anki: Anki) {
+  const ankiCard = await anki.getCard(card.id);
+  if (!ankiCard) {
+    await anki.addNote({
+      front: card.question,
+      back: card.answer,
+      deck: card.deck,
+      id: card.id
+    });
+    return;
   }
 
-  return res.result;
+  if (ankiCard.deck !== card.deck) {
+    await anki.changeDeck(ankiCard.ankiCardId, card.deck);
+  }
+
+  if (ankiCard.front !== card.question || ankiCard.back !== card.answer) {
+    await anki.updateNote(ankiCard.ankiNoteId, {
+      front: card.question,
+      back: card.answer
+    });
+  }
 }
 
-export async function getDeckNames(): Promise<string[]> {
-  const res = await getResult({
-    action: "deckNames",
-  });
-
-  return res;
-}
-
-export async function getModelFieldNames(modelName: string) {
-  const res = await getResult({
-    action: "modelFieldNames",
-    params: {
-      modelName: modelName,
-    },
-  });
-  return res;
-}
-
-export async function createModel(modelName: string) {
-  const res = await getResult({
-    action: "createModel",
-    params: {
-      modelName,
-      inOrderFields: ["Front", "Back", "Id"],
-      isCloze: false,
-      cardTemplates: [
-        {
-          Front: "{{Front}}",
-          Back: "{{Front}}<hr>{{Back}}",
-        },
-      ],
-    },
-  });
-  return res;
-}
-
-export async function modelNames(): Promise<string[]> {
-  const res = await getResult({
-    action: "modelNames",
-  });
-  return res;
-}
-
-export async function updateModelStyling(modelName: string, css: string) {
-  const res = await getResult({
-    action: "updateModelStyling",
-    params: {
-      model: {
-        name: modelName,
-        css,
-      },
-    },
-  });
-  return res;
-}
-
-export async function createDeck(deckName: string) {
-  const res = await getResult({
-    action: "createDeck",
-    params: {
-      deck: deckName,
-    },
-  });
-  return res;
-}
-
-export async function addNote(
-  deckName: string,
-  { front, back, id }: { front: string; back: string; id: string }
-) {
-  const res = await getResult({
-    action: "addNote",
-    params: {
-      note: {
-        deckName: deckName,
-        modelName: "MarkdownNote",
-        fields: {
-          Front: front,
-          Back: back,
-          Id: id,
-        },
-      },
-    },
-  });
-  return res;
-}
-
-export async function findNotes(id: string): Promise<number[]> {
-  const res = await getResult({
-    action: "findNotes",
-    params: {
-      query: `"id:${id}"`,
-    },
-  });
-  return res;
-}
-
-export async function updateNoteFields(
-  id: number,
-  { front, back }: { front: string; back: string }
-) {
-  const res = await getResult({
-    action: "updateNoteFields",
-    params: {
-      note: {
-        id,
-        fields: {
-          Front: front,
-          Back: back,
-        },
-      },
-    },
-  });
-  return res;
-}
-
-export async function notesInfo(noteId: number): Promise<any[]> {
-  const res = await getResult({
-    action: "notesInfo",
-    params: {
-      notes: [noteId],
-    },
-  });
-  return res;
+export async function ensureCards(cards: RenderedCard[], anki: Anki) {
+  for (const card of cards) {
+    await ensureCard(card, anki);
+  }
 }

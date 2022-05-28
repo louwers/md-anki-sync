@@ -1,13 +1,14 @@
-import { marked } from "marked";
+import { marked } from "@louwers/marked";
+import * as crypto from "node:crypto";
 
-export type Card = {
+export type MarkdownCard = {
   question: marked.Token[];
   answer: marked.Token[];
   id: string;
   deck: string;
 };
 
-type UnfinishedCard = Omit<Card, "deck"> & {
+type UnfinishedCard = Omit<MarkdownCard, "deck"> & {
   questionDepth: number;
   gathering: "question" | "answer";
 };
@@ -18,6 +19,12 @@ export type RenderedCard = {
   id: string;
   deck: string;
 };
+
+type Heading = marked.Token & { type: "heading" };
+
+type Functions = {
+  genId: () => string
+}
 
 const DECK_HEADING_START = "Deck: ";
 
@@ -44,12 +51,20 @@ export function getQuestionId(line: string) {
   return matches?.length == 2 ? matches[1] : null;
 }
 
-export function renderCard(unrenderedCard: Card): RenderedCard {
+export function renderCard(unrenderedCard: MarkdownCard): RenderedCard {
   return {
     ...unrenderedCard,
     question: marked.parser(unrenderedCard.question),
     answer: marked.parser(unrenderedCard.answer),
   };
+}
+
+export function renderCards(unrenderedCards: MarkdownCard[]): RenderedCard[] {
+  return unrenderedCards.map(renderCard);
+}
+
+function genId() {
+  return crypto.randomBytes(16).toString("hex");
 }
 
 function getDeckName(deckHeadings: (marked.Token & { type: "heading" })[]) {
@@ -71,7 +86,7 @@ function getDeckName(deckHeadings: (marked.Token & { type: "heading" })[]) {
 function finishCard(
   card: null | UnfinishedCard,
   deckHeadings: (marked.Token & { type: "heading" })[]
-): Card[] {
+): MarkdownCard[] {
   return card
     ? [
         {
@@ -105,25 +120,15 @@ export function shouldIncludeHeaderInQuestion(headerText: string) {
 function encounteredQuestion(
   ctx: Context,
   headToken: marked.Token & { type: "heading" },
-  tailTokens: marked.Token[]
+  tailTokens: marked.Token[],
 ): Context {
   const gathering = questionHasContext(headToken, tailTokens)
     ? "question"
     : "answer";
-  const id = getQuestionId(headToken.text);
-  if (!id)
-    return {
-      ...ctx,
-      tokens: tailTokens,
-      cards: [
-        ...ctx.cards,
-        ...finishCard(ctx.unfinishedCard, ctx.deckHeadings),
-      ],
-      errors: [
-        ...ctx.errors,
-        `Failed to get id for question '${headToken.text}'`,
-      ],
-    };
+  const questionId = getQuestionId(headToken.text);
+  const newId = questionId ? false : true;
+  const id = questionId ? questionId : ctx.functions.genId();
+  const ln = (headToken as unknown as {ln: number}).ln;
 
   return {
     ...ctx,
@@ -133,45 +138,61 @@ function encounteredQuestion(
       id: id,
       questionDepth: headToken.depth,
       gathering,
-      question: shouldIncludeHeaderInQuestion(headToken.text) ? [headToken] : [],
+      question: shouldIncludeHeaderInQuestion(headToken.text)
+        ? [headToken]
+        : [],
       answer: [],
     },
+    newIds: [...ctx.newIds, {id, ln} ]
+  };
+}
+
+function encounteredDeck(
+  ctx: Context,
+  headToken: Heading,
+  tailTokens: marked.Token[]
+): Context {
+  if (ctx.unfinishedCard && ctx.unfinishedCard.gathering === "answer")
+    return {
+      ...ctx,
+      errors: [
+        ...ctx.errors,
+        `Found Deck heading '${headToken.text}' while gathering answer for question. Ignoring question.`,
+      ],
+      tokens: tailTokens,
+      deckHeadings: [...ctx.deckHeadings, headToken],
+    };
+
+  return {
+    ...ctx,
+    cards: [...ctx.cards, ...finishCard(ctx.unfinishedCard, ctx.deckHeadings)],
+    tokens: tailTokens,
+    deckHeadings: [...ctx.deckHeadings, headToken],
   };
 }
 
 function processMarkdown(ctx: {
   tokens: marked.Token[];
-  cards: Card[];
+  cards: MarkdownCard[];
   deckHeadings: (marked.Token & { type: "heading" })[];
   unfinishedCard: UnfinishedCard | null;
   errors: string[];
-}): Card[] {
-  const { tokens, cards, deckHeadings, errors, unfinishedCard } = ctx;
+  newIds: { ln: number, id: string }[];
+  functions: Functions
+}): { cards: MarkdownCard[], newIds: { ln: number, id: string }[]} {
+  const { tokens, cards, deckHeadings, errors, unfinishedCard, newIds } = ctx;
   if (tokens.length === 0) {
     // console.log(JSON.stringify(ctx, null, 2));
-    return [...cards, ...finishCard(unfinishedCard, deckHeadings)];
+    return {
+      cards: [...cards, ...finishCard(unfinishedCard, deckHeadings)],
+      newIds
+    };
   }
   const [headToken, ...tailTokens] = tokens;
 
   if (headToken.type === "heading") {
     if (isDeckHeading(headToken)) {
-      if (unfinishedCard && unfinishedCard.gathering === "answer")
-        return processMarkdown({
-          ...ctx,
-          errors: [
-            ...errors,
-            `Found Deck heading '${headToken.text}' while gathering answer for question. Ignoring question.`,
-          ],
-          tokens: tailTokens,
-          deckHeadings: [...deckHeadings, headToken],
-        });
-
-      return processMarkdown({
-        ...ctx,
-        cards: [...cards, ...finishCard(unfinishedCard, deckHeadings)],
-        tokens: tailTokens,
-        deckHeadings: [...deckHeadings, headToken],
-      });
+      return processMarkdown(encounteredDeck(ctx, headToken, tailTokens));
     }
 
     if (
@@ -215,8 +236,14 @@ function processMarkdown(ctx: {
   });
 }
 
-export function getCards(markdown: string) {
-  const tokens = marked.lexer(markdown);
+const defaultFunctions: Functions = {
+  genId
+}
+
+export function getCards(markdown: string, functions: Functions = defaultFunctions) {
+  const tokens = marked.lexer(markdown, {
+    headerIds: true
+  });
   // console.log(JSON.stringify(tokens, null, 2));
   return processMarkdown({
     tokens,
@@ -224,5 +251,7 @@ export function getCards(markdown: string) {
     deckHeadings: [],
     errors: [],
     unfinishedCard: null,
+    newIds: [],
+    functions
   });
 }

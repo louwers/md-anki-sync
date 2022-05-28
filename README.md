@@ -72,6 +72,7 @@ Install [Anki Connect](https://foosoft.net/projects/anki-connect/). Run Anki bef
 Not available on npm yet. Clone this repository. Then:
 
 ```
+npm run build
 npm install -g .
 npx md-anki-sync filename.md
 ```

@@ -6,15 +6,20 @@ function addIdToLine(line: string, id: string) {
   return `${line} <!-- id:${id} -->`;
 }
 
-export function newIdListToRecord(newIds: {id: string, ln: number}[]): Record<number, string> {
+export function newIdListToRecord(
+  newIds: { id: string; ln: number }[]
+): Record<number, string> {
   const result: Record<number, string> = {};
-  for (const {id, ln} of newIds) {
+  for (const { id, ln } of newIds) {
     result[ln] = id;
   }
   return result;
 }
 
-export async function createNewFileWithNewIds(fileName: string, newIds: Record<number, string>) {
+export async function createNewFileWithNewIds(
+  fileName: string,
+  newIds: Record<number, string>
+) {
   const tempFile = temporaryFile();
 
   const fdIn = await fs.open(fileName, "r");
@@ -29,7 +34,7 @@ export async function createNewFileWithNewIds(fileName: string, newIds: Record<n
   });
 
   let ln = 0;
-  let started = false;  // make sure we don't put a newline after EOF
+  let started = false; // make sure we don't put a newline after EOF
 
   for await (const line of rl) {
     ++ln;
@@ -44,7 +49,6 @@ export async function createNewFileWithNewIds(fileName: string, newIds: Record<n
     } else {
       outStream.write(line);
     }
-    
   }
 
   await Promise.all([fdIn.close(), fdOut.close()]);

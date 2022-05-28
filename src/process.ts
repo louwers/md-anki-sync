@@ -23,8 +23,8 @@ export type RenderedCard = {
 type Heading = marked.Token & { type: "heading" };
 
 type Functions = {
-  genId: () => string
-}
+  genId: () => string;
+};
 
 const DECK_HEADING_START = "Deck: ";
 
@@ -120,7 +120,7 @@ export function shouldIncludeHeaderInQuestion(headerText: string) {
 function encounteredQuestion(
   ctx: Context,
   headToken: marked.Token & { type: "heading" },
-  tailTokens: marked.Token[],
+  tailTokens: marked.Token[]
 ): Context {
   const gathering = questionHasContext(headToken, tailTokens)
     ? "question"
@@ -128,7 +128,7 @@ function encounteredQuestion(
   const questionId = getQuestionId(headToken.text);
   const newId = questionId ? false : true;
   const id = questionId ? questionId : ctx.functions.genId();
-  const ln = (headToken as unknown as {ln: number}).ln;
+  const ln = (headToken as unknown as { ln: number }).ln;
 
   return {
     ...ctx,
@@ -143,7 +143,7 @@ function encounteredQuestion(
         : [],
       answer: [],
     },
-    newIds: [...ctx.newIds, {id, ln} ]
+    newIds: [...ctx.newIds, { id, ln }],
   };
 }
 
@@ -177,15 +177,15 @@ function processMarkdown(ctx: {
   deckHeadings: (marked.Token & { type: "heading" })[];
   unfinishedCard: UnfinishedCard | null;
   errors: string[];
-  newIds: { ln: number, id: string }[];
-  functions: Functions
-}): { cards: MarkdownCard[], newIds: { ln: number, id: string }[]} {
+  newIds: { ln: number; id: string }[];
+  functions: Functions;
+}): { cards: MarkdownCard[]; newIds: { ln: number; id: string }[] } {
   const { tokens, cards, deckHeadings, errors, unfinishedCard, newIds } = ctx;
   if (tokens.length === 0) {
     // console.log(JSON.stringify(ctx, null, 2));
     return {
       cards: [...cards, ...finishCard(unfinishedCard, deckHeadings)],
-      newIds
+      newIds,
     };
   }
   const [headToken, ...tailTokens] = tokens;
@@ -237,12 +237,15 @@ function processMarkdown(ctx: {
 }
 
 const defaultFunctions: Functions = {
-  genId
-}
+  genId,
+};
 
-export function getCards(markdown: string, functions: Functions = defaultFunctions) {
+export function getCards(
+  markdown: string,
+  functions: Functions = defaultFunctions
+) {
   const tokens = marked.lexer(markdown, {
-    headerIds: true
+    headerIds: true,
   });
   // console.log(JSON.stringify(tokens, null, 2));
   return processMarkdown({
@@ -252,6 +255,6 @@ export function getCards(markdown: string, functions: Functions = defaultFunctio
     errors: [],
     unfinishedCard: null,
     newIds: [],
-    functions
+    functions,
   });
 }

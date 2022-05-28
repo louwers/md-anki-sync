@@ -1,19 +1,24 @@
-import { RenderedCard } from './process';
+import { RenderedCard } from "./process";
 
 export type AnkiCard = {
-  ankiNoteId: number,
-  ankiCardId: number,
-  id: string,
-  front: string,
-  back: string,
-  deck: string
-}
+  ankiNoteId: number;
+  ankiCardId: number;
+  id: string;
+  front: string;
+  back: string;
+  deck: string;
+};
 
 export interface Anki {
-  getCard(id: string): Promise<AnkiCard | null>
-  addNote(note: Omit<AnkiCard, 'ankiCardId' | 'ankiNoteId'>): Promise<undefined>
-  updateNote(ankiId: number, fields: { front: string, back: string}): Promise<undefined>
-  changeDeck(ankiId: number, deckName: string): Promise<undefined>
+  getCard(id: string): Promise<AnkiCard | null>;
+  addNote(
+    note: Omit<AnkiCard, "ankiCardId" | "ankiNoteId">
+  ): Promise<undefined>;
+  updateNote(
+    ankiId: number,
+    fields: { front: string; back: string }
+  ): Promise<undefined>;
+  changeDeck(ankiId: number, deckName: string): Promise<undefined>;
 }
 
 async function ensureCard(card: RenderedCard, anki: Anki) {
@@ -23,7 +28,7 @@ async function ensureCard(card: RenderedCard, anki: Anki) {
       front: card.question,
       back: card.answer,
       deck: card.deck,
-      id: card.id
+      id: card.id,
     });
     return;
   }
@@ -35,7 +40,7 @@ async function ensureCard(card: RenderedCard, anki: Anki) {
   if (ankiCard.front !== card.question || ankiCard.back !== card.answer) {
     await anki.updateNote(ankiCard.ankiNoteId, {
       front: card.question,
-      back: card.answer
+      back: card.answer,
     });
   }
 }

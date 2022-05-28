@@ -22,7 +22,7 @@ Would result in a deck 'My Deck' being created. You will also notice that an ide
 ```md
 # Deck: Geography
 
-## What is the capital of Finland?  <!-- id:67da3a0fe59f3b71b5a4f78d51cc67b1 -->
+## What is the capital of Finland? <!-- id:67da3a0fe59f3b71b5a4f78d51cc67b1 -->
 
 Helsinki
 ```

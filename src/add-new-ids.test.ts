@@ -1,7 +1,7 @@
 import { test, expect } from "vitest";
 import { temporaryFile } from "tempy";
 import * as fs from "node:fs/promises";
-import {createNewFileWithNewIds} from './add-new-ids';
+import { createNewFileWithNewIds } from "./add-new-ids";
 
 async function temporaryFileWithContents(contents: string) {
   const tempFile = temporaryFile();
@@ -10,7 +10,6 @@ async function temporaryFileWithContents(contents: string) {
   return tempFile;
 }
 
-
 test("createNewFileWithNewIds", async () => {
   const mdFile = await temporaryFileWithContents(`
   # Hello world
@@ -18,8 +17,8 @@ test("createNewFileWithNewIds", async () => {
   ## Some other line`);
 
   const newFile = await createNewFileWithNewIds(mdFile, {
-    2: 'someid',
-    4: 'someotherid'
+    2: "someid",
+    4: "someotherid",
   });
 
   const newFileContents = (await fs.readFile(newFile)).toString();

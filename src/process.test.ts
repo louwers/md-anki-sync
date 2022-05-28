@@ -1,5 +1,11 @@
 import { test, expect } from "vitest";
-import { getCards, RenderedCard, renderCard, isDeck, shouldIncludeHeaderInQuestion } from "./process";
+import {
+  getCards,
+  RenderedCard,
+  renderCard,
+  isDeck,
+  shouldIncludeHeaderInQuestion,
+} from "./process";
 import { htmlToText } from "html-to-text";
 
 const mdNoIds = `# Deck: My Deck
@@ -9,13 +15,13 @@ const mdNoIds = `# Deck: My Deck
 First answer`;
 
 test("Markdown without ids", () => {
-  const {cards, newIds} = getCards(mdNoIds, {
-    genId: () => 'newId'
+  const { cards, newIds } = getCards(mdNoIds, {
+    genId: () => "newId",
   });
   expect(cards).toHaveLength(1);
   expect(newIds).toHaveLength(1);
   expect(newIds[0].ln).toBe(3);
-  expect(newIds[0].id).toBe('newId');
+  expect(newIds[0].id).toBe("newId");
 
   const renderedCard = renderCard(cards[0]);
   const plainCard = makePlainCard(renderedCard);
@@ -53,7 +59,7 @@ function makePlainCard({ question, answer, id, deck }: RenderedCard) {
 }
 
 test("md2", () => {
-  const {cards} = getCards(md2);
+  const { cards } = getCards(md2);
   expect(cards).toHaveLength(1);
 
   const renderedCard = renderCard(cards[0]);
@@ -82,7 +88,7 @@ This is the answer to the question.
 `;
 
 test("md3", () => {
-  const {cards} = getCards(md3);
+  const { cards } = getCards(md3);
   expect(cards).toHaveLength(1);
 
   const renderedCard = renderCard(cards[0]);
@@ -104,7 +110,7 @@ test("isDeck", () => {
 
 test("shouldIncludeHeaderInQuestion", () => {
   expect(shouldIncludeHeaderInQuestion("Question")).toBe(false);
-})
+});
 
 const md4 = `
 # Deck: Upper Deck
@@ -117,7 +123,7 @@ Some Answer
 `;
 
 test("md4", () => {
-  const {cards} = getCards(md4);
+  const { cards } = getCards(md4);
   expect(cards).toHaveLength(1);
 
   const renderedCard = renderCard(cards[0]);
@@ -133,7 +139,6 @@ test("md4", () => {
   expect(plainCard).toEqual(expectedCard);
 });
 
-
 const md5 = `
 # Deck: My Deck
 
@@ -147,7 +152,7 @@ Another answer
 `;
 
 test("Multiple Questions", () => {
-  const {cards} = getCards(md5);
+  const { cards } = getCards(md5);
   expect(cards).toHaveLength(2);
 
   const renderedCard0 = renderCard(cards[0]);
@@ -184,7 +189,7 @@ Some Question
 Some Answer`;
 
 test("Question without heading", () => {
-  const {cards} = getCards(md6);
+  const { cards } = getCards(md6);
   expect(cards).toHaveLength(1);
 
   const renderedCard = renderCard(cards[0]);

@@ -1,5 +1,5 @@
 import fetch from "node-fetch";
-import type {Anki, AnkiCard} from './anki';
+import type { Anki, AnkiCard } from "./anki";
 
 async function getResult(body: any) {
   const res: any = await (
@@ -139,17 +139,19 @@ export async function updateNoteFields(
   return res;
 }
 
-export async function notesInfo(noteId: number): Promise<{
-  noteId: number,
-  modelName: string,
-  tags: string[],
-  fields: {
-    Front: string,
-    Back: string,
-    Id: string
-  },
-  cards: number[]
-}[]> {
+export async function notesInfo(noteId: number): Promise<
+  {
+    noteId: number;
+    modelName: string;
+    tags: string[];
+    fields: {
+      Front: string;
+      Back: string;
+      Id: string;
+    };
+    cards: number[];
+  }[]
+> {
   const res = await getResult({
     action: "notesInfo",
     params: {
@@ -159,21 +161,23 @@ export async function notesInfo(noteId: number): Promise<{
   return res;
 }
 
-export async function cardsInfo(cardIds: number[]): Promise<{
-  question: string,
-  answer: string,
-  deckName: string,
-  modelName: string,
-  fieldOrder: number,
-  fields: {
-    Front: { value: string, order: number},
-    Back: { value: string, order: number }
-  },
-  css: string,
-  cardId: number,
-  interval: number,
-  note: number
-}[]> {
+export async function cardsInfo(cardIds: number[]): Promise<
+  {
+    question: string;
+    answer: string;
+    deckName: string;
+    modelName: string;
+    fieldOrder: number;
+    fields: {
+      Front: { value: string; order: number };
+      Back: { value: string; order: number };
+    };
+    css: string;
+    cardId: number;
+    interval: number;
+    note: number;
+  }[]
+> {
   const res = await getResult({
     action: "cardsInfo",
     params: {
@@ -196,7 +200,7 @@ export const ankiConnect: Anki = {
 
     if (notesInfoResult[0].cards.length > 1)
       throw new Error("Found multiple cards for note.");
-    
+
     if (notesInfoResult[0].cards.length == 0)
       throw new Error(`Found no corresponding card for note with id '${id}'.`);
 
@@ -210,8 +214,8 @@ export const ankiConnect: Anki = {
       front: notesInfoResult[0].fields.Front,
       back: notesInfoResult[0].fields.Back,
       id: notesInfoResult[0].fields.Id,
-      deck
-    }
+      deck,
+    };
   },
   addNote: async function (note: Omit<AnkiCard, "ankiId">): Promise<undefined> {
     await ensureDeck(note.deck);
@@ -219,19 +223,25 @@ export const ankiConnect: Anki = {
     await addNote(note.deck, {
       back: note.back,
       front: note.front,
-      id: note.id
+      id: note.id,
     });
     return;
   },
-  updateNote: async function (ankiId: number, {front, back}: { front: string; back: string; }): Promise<undefined> {
+  updateNote: async function (
+    ankiId: number,
+    { front, back }: { front: string; back: string }
+  ): Promise<undefined> {
     await updateNoteFields(ankiId, {
       front,
-      back
+      back,
     });
     return;
   },
-  changeDeck: async function (ankiId: number, deckName: string): Promise<undefined> {
+  changeDeck: async function (
+    ankiId: number,
+    deckName: string
+  ): Promise<undefined> {
     await this.changeDeck(ankiId, deckName);
     return;
-  }
-}
+  },
+};

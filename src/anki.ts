@@ -21,7 +21,7 @@ export interface Anki {
   changeDeck(ankiId: number, deckName: string): Promise<undefined>;
 }
 
-async function ensureCard(card: RenderedCard, anki: Anki) {
+export async function ensureCard(card: RenderedCard, anki: Anki) {
   const ankiCard = await anki.getCard(card.id);
   if (!ankiCard) {
     await anki.addNote({

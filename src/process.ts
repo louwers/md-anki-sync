@@ -170,7 +170,6 @@ function _processMarkdown(ctx: {
 }): { cards: MarkdownCard[]; newIds: { ln: number; id: string }[] } {
   const { tokens, cards, deckHeadings, errors, unfinishedCard, newIds } = ctx;
   if (tokens.length === 0) {
-    // console.log(JSON.stringify(ctx, null, 2));
     return {
       cards: [...cards, ...finishCard(unfinishedCard, deckHeadings)],
       newIds,
@@ -235,7 +234,6 @@ export function processMarkdown(
   const tokens = marked.lexer(markdown, {
     headerIds: true,
   });
-  // console.log(JSON.stringify(tokens, null, 2));
   return _processMarkdown({
     tokens,
     cards: [],

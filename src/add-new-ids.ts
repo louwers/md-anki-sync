@@ -55,4 +55,9 @@ export async function createNewFileWithNewIds(
   return tempFile;
 }
 
-// await fs.copyFile(tempFile, fileName);
+export async function addNewIdsToFile(...[fileName, newIds]: Parameters<typeof createNewFileWithNewIds>) {
+  if (Object.keys(newIds).length === 0) return; // no need to add any new ids
+  const newFile = await createNewFileWithNewIds(fileName, newIds);
+  console.log(newFile);
+  await fs.copyFile(newFile, fileName);
+}

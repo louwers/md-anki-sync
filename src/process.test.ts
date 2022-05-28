@@ -1,12 +1,12 @@
 import { test, expect } from "vitest";
 import {
-  getCards,
+  processMarkdown,
   RenderedCard,
-  renderCard,
   isDeck,
   shouldIncludeHeaderInQuestion,
 } from "./process";
 import { htmlToText } from "html-to-text";
+import { renderCard } from "./render";
 
 const mdNoIds = `# Deck: My Deck
 
@@ -15,7 +15,7 @@ const mdNoIds = `# Deck: My Deck
 First answer`;
 
 test("Markdown without ids", () => {
-  const { cards, newIds } = getCards(mdNoIds, {
+  const { cards, newIds } = processMarkdown(mdNoIds, {
     genId: () => "newId",
   });
   expect(cards).toHaveLength(1);
@@ -34,6 +34,53 @@ test("Markdown without ids", () => {
   };
 
   expect(plainCard).toEqual(expectedCard);
+});
+
+
+const mdSomeIds = `# Deck: My Deck
+
+## First question? <!-- id:someid -->
+
+First answer
+
+## Question
+
+q
+
+### Answer
+
+a`;
+
+test("Markdown with some ids", () => {
+  const { cards, newIds } = processMarkdown(mdSomeIds, {
+    genId: () => "newId",
+  });
+  expect(cards).toHaveLength(2);
+  expect(newIds).toHaveLength(1);
+  expect(newIds[0].ln).toBe(7);
+  expect(newIds[0].id).toBe("newId");
+
+  const renderedCard = renderCard(cards[0]);
+  const plainCard = makePlainCard(renderedCard);
+
+  const expectedCard = {
+    question: "First question?",
+    answer: "First answer",
+    id: "someid",
+    deck: "My Deck",
+  };
+  expect(plainCard).toEqual(expectedCard);
+
+  const renderedCard1 = renderCard(cards[1]);
+  const plainCard1 = makePlainCard(renderedCard1);
+
+  const expectedCard1 = {
+    question: "q",
+    answer: "a",
+    id: "newId",
+    deck: "My Deck",
+  };
+  expect(plainCard1).toEqual(expectedCard1);
 });
 
 const md2 = `
@@ -59,8 +106,9 @@ function makePlainCard({ question, answer, id, deck }: RenderedCard) {
 }
 
 test("md2", () => {
-  const { cards } = getCards(md2);
+  const { cards, newIds } = processMarkdown(md2);
   expect(cards).toHaveLength(1);
+  expect(newIds).toHaveLength(0);
 
   const renderedCard = renderCard(cards[0]);
   const plainCard = makePlainCard(renderedCard);
@@ -88,8 +136,9 @@ This is the answer to the question.
 `;
 
 test("md3", () => {
-  const { cards } = getCards(md3);
+  const { cards, newIds } = processMarkdown(md3);
   expect(cards).toHaveLength(1);
+  expect(newIds).toHaveLength(0);
 
   const renderedCard = renderCard(cards[0]);
   const plainCard = makePlainCard(renderedCard);
@@ -123,8 +172,9 @@ Some Answer
 `;
 
 test("md4", () => {
-  const { cards } = getCards(md4);
+  const { cards, newIds } = processMarkdown(md4);
   expect(cards).toHaveLength(1);
+  expect(newIds).toHaveLength(0);
 
   const renderedCard = renderCard(cards[0]);
   const plainCard = makePlainCard(renderedCard);
@@ -152,8 +202,9 @@ Another answer
 `;
 
 test("Multiple Questions", () => {
-  const { cards } = getCards(md5);
+  const { cards, newIds } = processMarkdown(md5);
   expect(cards).toHaveLength(2);
+  expect(newIds).toHaveLength(0);
 
   const renderedCard0 = renderCard(cards[0]);
   const plainCard0 = makePlainCard(renderedCard0);
@@ -189,8 +240,9 @@ Some Question
 Some Answer`;
 
 test("Question without heading", () => {
-  const { cards } = getCards(md6);
+  const { cards, newIds } = processMarkdown(md6);
   expect(cards).toHaveLength(1);
+  expect(newIds).toHaveLength(0);
 
   const renderedCard = renderCard(cards[0]);
   const plainCard = makePlainCard(renderedCard);

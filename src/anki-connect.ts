@@ -89,6 +89,18 @@ export async function createDeck(deckName: string) {
   return res;
 }
 
+export async function changeDeck(deck: string, cardsIds: number[]) {
+  const res = await getResult({
+    action: "changeDeck",
+    params: {
+      deck,
+      cards: cardsIds
+
+    },
+  });
+  return res;
+}
+
 export async function addNote(
   deckName: string,
   { front, back, id }: { front: string; back: string; id: string }
@@ -238,10 +250,10 @@ export const ankiConnect: Anki = {
     return;
   },
   changeDeck: async function (
-    ankiId: number,
+    ankiCardId: number,
     deckName: string
   ): Promise<undefined> {
-    await this.changeDeck(ankiId, deckName);
+    await changeDeck(deckName, [ankiCardId]);
     return;
   },
 };

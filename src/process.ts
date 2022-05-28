@@ -51,18 +51,6 @@ export function getQuestionId(line: string) {
   return matches?.length == 2 ? matches[1] : null;
 }
 
-export function renderCard(unrenderedCard: MarkdownCard): RenderedCard {
-  return {
-    ...unrenderedCard,
-    question: marked.parser(unrenderedCard.question),
-    answer: marked.parser(unrenderedCard.answer),
-  };
-}
-
-export function renderCards(unrenderedCards: MarkdownCard[]): RenderedCard[] {
-  return unrenderedCards.map(renderCard);
-}
-
 function genId() {
   return crypto.randomBytes(16).toString("hex");
 }
@@ -106,12 +94,12 @@ function questionHasContext(
 
     if (token.depth === questionToken.depth + 1) return token.text === "Answer";
 
-    if (token.depth < questionToken.depth) return false;
+    if (token.depth <= questionToken.depth) return false;
   }
   return false;
 }
 
-type Context = Parameters<typeof processMarkdown>[0];
+type Context = Parameters<typeof _processMarkdown>[0];
 
 export function shouldIncludeHeaderInQuestion(headerText: string) {
   return !headerText.startsWith("Question");
@@ -143,7 +131,7 @@ function encounteredQuestion(
         : [],
       answer: [],
     },
-    newIds: [...ctx.newIds, { id, ln }],
+    newIds: newId ? [...ctx.newIds, { id, ln }] : ctx.newIds,
   };
 }
 
@@ -171,7 +159,7 @@ function encounteredDeck(
   };
 }
 
-function processMarkdown(ctx: {
+function _processMarkdown(ctx: {
   tokens: marked.Token[];
   cards: MarkdownCard[];
   deckHeadings: (marked.Token & { type: "heading" })[];
@@ -192,7 +180,7 @@ function processMarkdown(ctx: {
 
   if (headToken.type === "heading") {
     if (isDeckHeading(headToken)) {
-      return processMarkdown(encounteredDeck(ctx, headToken, tailTokens));
+      return _processMarkdown(encounteredDeck(ctx, headToken, tailTokens));
     }
 
     if (
@@ -202,7 +190,7 @@ function processMarkdown(ctx: {
       headToken.text === "Answer"
     ) {
       // switch to gathering answer
-      return processMarkdown({
+      return _processMarkdown({
         ...ctx,
         tokens: tailTokens,
         unfinishedCard: {
@@ -213,11 +201,11 @@ function processMarkdown(ctx: {
     }
 
     if (!unfinishedCard || headToken.depth <= unfinishedCard.questionDepth) {
-      return processMarkdown(encounteredQuestion(ctx, headToken, tailTokens));
+      return _processMarkdown(encounteredQuestion(ctx, headToken, tailTokens));
     }
   }
 
-  return processMarkdown({
+  return _processMarkdown({
     ...ctx,
     tokens: tailTokens,
     unfinishedCard: unfinishedCard
@@ -240,7 +228,7 @@ const defaultFunctions: Functions = {
   genId,
 };
 
-export function getCards(
+export function processMarkdown(
   markdown: string,
   functions: Functions = defaultFunctions
 ) {
@@ -248,7 +236,7 @@ export function getCards(
     headerIds: true,
   });
   // console.log(JSON.stringify(tokens, null, 2));
-  return processMarkdown({
+  return _processMarkdown({
     tokens,
     cards: [],
     deckHeadings: [],

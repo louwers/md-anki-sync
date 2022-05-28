@@ -1,18 +1,13 @@
-import { getCards, renderCards } from "./process";
+import { processMarkdown } from "./process";
 import * as fs from "node:fs/promises";
-import { ankiConnect, findNotes } from "./anki-connect";
+import { ankiConnect } from "./anki-connect";
 import { ensureCards } from "./anki";
-import { ankiDummy } from "./anki-dummy";
+import { renderCards } from "./render";
+import { addNewIdsToFile, newIdListToRecord } from "./add-new-ids";
 
 // const md = new MarkdownIt({
 //   highlight: function (str, lang) {
-//     if (lang && hljs.getLanguage(lang)) {
-//       try {
-//         return hljs.highlight(str, { language: lang }).value;
-//       } catch (__) {}
-//     }
 
-//     return ""; // use external default escaping
 //   },
 // });
 
@@ -49,7 +44,9 @@ import { ankiDummy } from "./anki-dummy";
 
 export async function syncMarkdown(fileName: string) {
   const markdown = (await fs.readFile(fileName)).toString();
-  const { cards } = getCards(markdown);
+  const { cards, newIds } = processMarkdown(markdown);
+  console.log('newIds', newIds);
+  await addNewIdsToFile(fileName, newIdListToRecord(newIds));
   const renderedCards = renderCards(cards);
 
   ensureCards(renderedCards, ankiConnect);

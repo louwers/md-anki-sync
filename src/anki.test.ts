@@ -1,5 +1,4 @@
 import { expect, test } from "vitest";
-import { RenderedCard } from './process';
 import { ensureCard, AnkiCard } from "./anki";
 import { AnkiDummy } from "./anki-dummy";
 

@@ -8,7 +8,7 @@ export type MarkdownCard = {
   deck: string;
 };
 
-type UnfinishedCard = Omit<MarkdownCard, "deck"> & {
+type UnfinishedCard = MarkdownCard & {
   questionDepth: number;
   gathering: "question" | "answer";
 };
@@ -55,7 +55,7 @@ function genId() {
   return crypto.randomBytes(16).toString("hex");
 }
 
-function getDeckName(deckHeadings: (marked.Token & { type: "heading" })[]) {
+function getDeckName(deckHeadings: Heading[]) {
   if (deckHeadings.length === 0) return "";
   const deckNameParts = [
     deckNameFromHeading(deckHeadings[deckHeadings.length - 1].text),
@@ -73,16 +73,8 @@ function getDeckName(deckHeadings: (marked.Token & { type: "heading" })[]) {
 
 function finishCard(
   card: null | UnfinishedCard,
-  deckHeadings: (marked.Token & { type: "heading" })[]
 ): MarkdownCard[] {
-  return card
-    ? [
-        {
-          deck: getDeckName(deckHeadings),
-          ...card,
-        },
-      ]
-    : [];
+  return card ? [card] : [];
 }
 
 function questionHasContext(
@@ -121,7 +113,7 @@ function encounteredQuestion(
   return {
     ...ctx,
     tokens: tailTokens,
-    cards: [...ctx.cards, ...finishCard(ctx.unfinishedCard, ctx.deckHeadings)],
+    cards: [...ctx.cards, ...finishCard(ctx.unfinishedCard)],
     unfinishedCard: {
       id: id,
       questionDepth: headToken.depth,
@@ -130,6 +122,7 @@ function encounteredQuestion(
         ? [headToken]
         : [],
       answer: [],
+      deck: getDeckName(ctx.deckHeadings)
     },
     newIds: newId ? [...ctx.newIds, { id, ln }] : ctx.newIds,
   };
@@ -153,7 +146,7 @@ function encounteredDeck(
 
   return {
     ...ctx,
-    cards: [...ctx.cards, ...finishCard(ctx.unfinishedCard, ctx.deckHeadings)],
+    cards: [...ctx.cards, ...finishCard(ctx.unfinishedCard)],
     tokens: tailTokens,
     deckHeadings: [...ctx.deckHeadings, headToken],
   };

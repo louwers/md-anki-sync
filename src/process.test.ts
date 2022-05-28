@@ -254,3 +254,35 @@ test("Question without heading", () => {
   };
   expect(plainCard).toEqual(expectedCard);
 });
+
+
+const twoChildDecksSameLevel = `
+# Deck: Upper
+
+## Deck: Child1
+
+### q1  <!-- id:xxx -->
+
+a1
+
+## Deck: Child2
+
+### q  <!-- id:yyy -->
+
+a`;
+
+test("Two child decks at same level", () => {
+  const { cards, newIds } = processMarkdown(twoChildDecksSameLevel);
+  expect(cards).toHaveLength(2);
+  expect(newIds).toHaveLength(0);
+
+  const renderedCard = renderCard(cards[0]);
+  const plainCard = makePlainCard(renderedCard);
+  const expectedCard = {
+    question: "q1",
+    answer: "a1",
+    id: "xxx",
+    deck: "Upper::Child1",
+  };
+  expect(plainCard).toEqual(expectedCard);
+});
